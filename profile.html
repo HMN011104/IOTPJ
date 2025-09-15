@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <title>Profile | IOT CONTROL SYSTEM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+<div class="bg"></div>
+<div class="center-wrap">
+  <div class="phone-frame">
+    <div class="brand-row">
+        <img src="assets/logo.png" alt="logo" width="84" height="84">
+        <div class="brand app-title">IOT CONTROL SYSTEM</div>
+      </div>
+    <div class="topbar">
+      <div class="actions">
+        <button id="btnProfile" class="btn">Profile</button>
+      </div>
+      <div class="title" id="welcomeUser">Chào mừng</div>
+      <div class="actions">
+        <button id="btnLogout" class="btn danger">Đăng xuất</button>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="big-title">Thông tin:</div>
+      <div class="card">
+        <div class="row"><span class="muted">Username:</span> <b id="pUsername">...</b></div>
+        <div class="row"><span class="muted">Email:</span> <b id="pEmail">...</b></div>
+        <div class="row"><span class="muted">Id mạch (circuitId):</span> <b id="pCircuit">...</b></div>
+      </div>
+
+      <div class="big-title">Cập nhật id mạch</div>
+      <div class="card">
+        <div class="field">
+          <label class="label">Nhập circuitId</label>
+          <input id="inpCircuit" class="input" placeholder="Ví dụ: 123456"/>
+        </div>
+        <button id="btnSave" class="btn primary block">Xác nhận</button>
+        <div id="msg" class="notice" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="bottomnav">
+      <a class="tab" href="main.html">Home</a>
+      <a class="tab" href="history.html">History</a>
+      <a class="tab" href="notifications.html">Notification</a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { requireAuth, wireTopbar } from "./js/auth-guard.js";
+import { getUserDoc, updateCircuitId } from "./js/firestore.js";
+import { qs, toast } from "./js/utils.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { auth } from "./js/firebase-config.js";
+
+const user = await requireAuth();
+wireTopbar(user);
+
+async function load(){
+  const u = await getUserDoc(user.uid);
+  qs("#pUsername").textContent = u?.username || "-";
+  qs("#pEmail").textContent = u?.email || "-";
+  qs("#pCircuit").textContent = u?.circuitId || "(chưa liên kết)";
+}
+await load();
+
+qs("#btnSave").addEventListener("click", async ()=>{
+  const cid = qs("#inpCircuit").value.trim();
+  const msg = qs("#msg");
+  if(!cid) return toast(msg, "Vui lòng nhập circuitId");
+  try{
+    await updateCircuitId(user.uid, cid);
+    toast(msg, "Đã cập nhật Id mạch", "success");
+    await load();
+  }catch(e){
+    toast(msg, e.message || "Cập nhật thất bại");
+  }
+});
+
+document.querySelector("#btnLogout").addEventListener("click", ()=>signOut(auth).then(()=>location.href="login.html"));
+</script>
+</body>
+</html>

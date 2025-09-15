@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IoT Control</title>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = localStorage.getItem("auth_token");
+
+      if (token) {
+        window.location.href = "mainscreen.html";
+      } else {
+        // Chưa đăng nhập -> login
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</head>
+<body>
+  <p>Đang tải...</p>
+</body>
+</html>

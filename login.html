@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <title>Login | IOT CONTROL SYSTEM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+<div class="bg"></div>
+<div class="center-wrap">
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="brand-row">
+        <img src="assets/logo.png" alt="logo" width="84" height="84"/>
+        <div class="brand app-title">IOT CONTROL SYSTEM</div>
+      </div>
+      <div class="big-title">Đăng nhập</div>
+      <div class="card">
+        <div class="field">
+          <label class="label">Username hoặc Email</label>
+          <input id="email" class="input" type="email" placeholder="test@example.com"/>
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <input id="password" class="input" type="password" placeholder="••••••••"/>
+        </div>
+        <button id="btnLogin" class="btn primary block">Đăng nhập</button>
+        <div id="msg" class="notice" style="display:none;"></div>
+      </div>
+
+      <div class="center muted">Bạn chưa có tài khoản?
+        <a class="link" href="signup.html">Đăng ký</a>
+      </div>
+      <div class="helper small">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { auth } from "./js/firebase-config.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { addLoginNotification, ensureUserDoc, getUserDoc } from "./js/firestore.js";
+import { qs, toast } from "./js/utils.js";
+
+const email = qs("#email");
+const password = qs("#password");
+const btn = qs("#btnLogin");
+const msg = qs("#msg");
+
+btn.addEventListener("click", async ()=> {
+  btn.disabled = true;
+  try {
+    const cred = await signInWithEmailAndPassword(
+      auth, 
+      email.value.trim(), 
+      password.value.trim()
+    );
+
+    await ensureUserDoc(cred.user);
+    const udoc = await getUserDoc(cred.user.uid);
+    localStorage.setItem("username", udoc?.username || "");
+
+    if (cred?.user) {
+      console.log("📌 Gọi addLoginNotification với:", cred.user.uid);
+      await addLoginNotification(cred.user.uid);   // ✅ gọi đúng userId
+    }
+
+    location.href = "main.html";
+  } catch(e) {
+    toast(msg, e.message || "Đăng nhập thất bại");
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>

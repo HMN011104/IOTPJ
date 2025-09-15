@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <title>Notifications | IOT CONTROL SYSTEM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+<div class="bg"></div>
+<div class="center-wrap">
+  <div class="phone-frame">
+    <div class="brand-row">
+        <img src="assets/logo.png" alt="logo" width="84" height="84">
+        <div class="brand app-title">IOT CONTROL SYSTEM</div>
+      </div>
+    <div class="topbar">
+      <div class="actions">
+        <button id="btnProfile" class="btn">Profile</button>
+      </div>
+      <div class="title" id="welcomeUser">Chào mừng</div>
+      <div class="actions">
+        <button id="btnLogout" class="btn danger">Đăng xuất</button>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="big-title">Thông báo đăng nhập</div>
+      <div class="hr"></div>
+      <div id="notiList" class="list"></div>
+      <div class="helper small">* Tối đa hiển thị 5 thông báo gần nhất.</div>
+    </div>
+
+    <div class="bottomnav">
+      <a class="tab" href="main.html">Home</a>
+      <a class="tab" href="history.html">History</a>
+      <a class="tab active" href="notifications.html">Notification</a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { requireAuth, wireTopbar } from "./js/auth-guard.js";
+import { listenNotifications } from "./js/firestore.js";
+import { renderNotifications } from "./js/ui.js";
+import { fmtTime, qs } from "./js/utils.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { auth } from "./js/firebase-config.js";
+
+const user = await requireAuth();
+wireTopbar(user);
+
+const listEl = qs("#notiList");
+const unsub = listenNotifications(user.uid, (items)=>{
+  const mapped = items.map(i=>({ ...i, _fmt: fmtTime(i.timestamp) }));
+  renderNotifications(listEl, mapped);
+});
+window.addEventListener("beforeunload", ()=>unsub && unsub());
+
+document.querySelector("#btnLogout").addEventListener("click", ()=>signOut(auth).then(()=>location.href="login.html"));
+</script>
+</body>
+</html>

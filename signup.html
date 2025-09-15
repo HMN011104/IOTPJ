@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <title>Sign up | IOT CONTROL SYSTEM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+<div class="bg"></div>
+<div class="center-wrap">
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="brand-row">
+        <img src="assets/logo.png" alt="logo" width="84" height="84"/>
+        <div class="brand app-title">IOT CONTROL SYSTEM</div>
+      </div>
+      <div class="big-title">Đăng ký</div>
+      <div class="card">
+        <div class="field">
+          <label class="label">Username</label>
+          <input id="username" class="input" placeholder="testuser"/>
+        </div>
+        <div class="field">
+          <label class="label">Email</label>
+          <input id="email" class="input" type="email" placeholder="test@example.com"/>
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <input id="password" class="input" type="password" placeholder="••••••••"/>
+        </div>
+        <div class="field">
+          <label class="label">Xác nhận password</label>
+          <input id="confirm" class="input" type="password" placeholder="••••••••"/>
+        </div>
+        <button id="btnSignup" class="btn primary block">Đăng ký</button>
+        <div id="msg" class="notice" style="display:none;"></div>
+      </div>
+
+      <div class="center muted">Bạn đã có tài khoản?
+        <a class="link" href="login.html">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { auth } from "./js/firebase-config.js";
+import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { ensureUserDoc } from "./js/firestore.js";
+import { qs, toast } from "./js/utils.js";
+
+const btn = qs("#btnSignup");
+btn.addEventListener("click", async ()=>{
+  const username = qs("#username").value.trim();
+  const email = qs("#email").value.trim();
+  const pass = qs("#password").value.trim();
+  const confirm = qs("#confirm").value.trim();
+  const msg = qs("#msg");
+
+  if(!username || !email || !pass || !confirm) return toast(msg, "Vui lòng điền đủ thông tin");
+  if(pass!==confirm) return toast(msg, "Mật khẩu xác nhận không khớp");
+
+  btn.disabled = true;
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: username });
+    await ensureUserDoc(cred.user, username);
+    localStorage.setItem("username", username);
+    location.href = "main.html";
+  }catch(e){
+    toast(msg, e.message || "Đăng ký thất bại");
+  }finally{
+    btn.disabled=false;
+  }
+});
+</script>
+</body>
+</html>
