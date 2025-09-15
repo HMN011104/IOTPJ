@@ -27,6 +27,9 @@
         </div>
         <button id="btnLogin" class="btn primary block">Đăng nhập</button>
         <div id="msg" class="notice" style="display:none;"></div>
+        <div style="margin-top: 8px;">
+          <a class="link" href="retrievepassword.html">Quên mật khẩu?</a>
+      </div>
       </div>
 
       <div class="center muted">Bạn chưa có tài khoản?
@@ -64,7 +67,7 @@ btn.addEventListener("click", async ()=> {
 
     if (cred?.user) {
       console.log("📌 Gọi addLoginNotification với:", cred.user.uid);
-      await addLoginNotification(cred.user.uid);   // ✅ gọi đúng userId
+      await addLoginNotification(cred.user.uid);   // gọi đúng userId
     }
 
     location.href = "main.html";
